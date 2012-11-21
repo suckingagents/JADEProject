@@ -19,6 +19,14 @@ import jade.lang.acl.UnreadableException;
 public class Robot extends Agent{
 	String name;
 	String room;
+	public String getRoom() {
+		return room;
+	}
+
+	public void setRoom(String room) {
+		this.room = room;
+	}
+
 	int dustRemoveRatio;
 	protected void setup(){
 		room = null;
@@ -90,7 +98,7 @@ public class Robot extends Agent{
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver( new AID( room , AID.ISLOCALNAME));
 			int dDust = dustRemoveRatio;
-			Msg.RobotStatus myStatus = new Msg.RobotStatus(name, dDust);
+			Msg.RobotStatus myStatus = new Msg.RobotStatus(name, room, dDust);
 			try {
 				msg.setContentObject(myStatus);
 			} catch (IOException e) {

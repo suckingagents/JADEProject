@@ -38,6 +38,11 @@ public class GUI extends GuiAgent {
 					Msg.RoomStatus roomStatus = (Msg.RoomStatus) myObject; 
 					aGui.gui.updateRoomPane(roomStatus.name, roomStatus.dustLevel);
 					System.out.println("GUI OPDATERER: " + roomStatus.name);
+				} else if (myObject instanceof Msg.RobotStatus) {
+					Msg.RobotStatus robotStatus = (Msg.RobotStatus) myObject;
+					//if(aGui.gui.robotInRoomMap.get(robotStatus.getName()) != null) {
+					//	aGui.gui.robotInRoomMap.put(aGui.gui.roomMap.get(robotStatus.getRoom()),robotStatus.getName());
+					//}
 				}
 			}
 	//		aGui.gui.testLbl.setText("Måske!!!");

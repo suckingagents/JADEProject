@@ -31,7 +31,7 @@ public class Room extends Agent{
 		dustLevel = 30;
 		dustThreshold = 50;
 		maxDustLevel = 255;
-		dustRatio = 4;
+		dustRatio = 5;
 		name = getAID().getLocalName();
 		
 		addBehaviour(new dustBehaviour( this ));
@@ -95,7 +95,7 @@ public class Room extends Agent{
 		@Override
 		public void action() {
 			// We can only fill the room with maxDustLevel.
-			if(dustLevel + dustRatio < maxDustLevel) {
+			if(dustLevel + dustRatio <= maxDustLevel) {
 				dustLevel += dustRatio;
 			}
 			
