@@ -8,6 +8,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.AgentDescriptor;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.AMSService;
 import jade.domain.DFService;
@@ -26,6 +27,8 @@ public class Room extends Agent{
 	int dustThreshold;
 	int maxDustLevel;
 	String name;
+	Msg.RoomStatus roomStatus;
+	boolean doBargain = false;
 	protected void setup(){
 //		dustlevel = new Random().nextInt(100);
 		dustLevel = 30;
@@ -35,11 +38,100 @@ public class Room extends Agent{
 		name = getAID().getLocalName();
 		
 		addBehaviour(new dustBehaviour( this ));
-		//TODO changed tick from 5000 til 1000
-//		addBehaviour(new dustManagingBehaviour( this, 5000 ));
 		addBehaviour(new dustManagingBehaviour( this, 1000 ));
+		addBehaviour( new BargainBehavior(this));
 	}
 	
+	private void addAllRobotsToMsg(ACLMessage msg){
+		DFAgentDescription dfd = new DFAgentDescription();
+        ServiceDescription sd  = new ServiceDescription();
+        sd.setType( "Robot" );
+        dfd.addServices(sd);
+        
+        DFAgentDescription[] result = null;
+		try {
+			result = DFService.search(this, dfd);
+		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
+		
+        for (int i = 0; i < result.length ; i++){
+        	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
+        	msg.addReceiver( result[i].getName() );
+        }
+	}
+	
+	class BargainBehavior extends SimpleBehaviour{
+		Room room;
+		int state;
+		static final int ST_IDLE = 0;
+		static final int ST_WAIT_INCOMING = 1;
+		long q0;
+		static final long MAX_WAIT_TIME = 5000;
+		
+		public BargainBehavior(Room room){
+			this.room = room;
+			state = ST_IDLE;
+		}
+		@Override
+		public void action() {
+			switch (state) {
+			case ST_IDLE:
+					if (doBargain){
+						System.err.println("WE START HERE");
+						// request for robot
+						Msg.RoomBargin bargain = new Msg.RoomBargin(Msg.RoomBargin.AGENT_ROOM, Msg.RoomBargin.TYPE_REQUEST, roomStatus);
+						ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+						addAllRobotsToMsg(msg);
+						try {
+							msg.setContentObject(bargain);
+							send(msg);
+							System.err.println("MSG SENT");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+						q0 = System.currentTimeMillis();
+						state = ST_WAIT_INCOMING;
+					}
+				break;
+			case ST_WAIT_INCOMING:
+				long q1 = System.currentTimeMillis();
+				q1 = q1 - q0;
+				if ( q1 >= MAX_WAIT_TIME ){
+					// go back to idle
+					state = ST_IDLE;
+				}
+				
+				// Check for answer
+				ACLMessage msg = receive();
+				if (msg != null){
+					Object myObject = null;
+					try {
+						myObject = msg.getContentObject();
+					} catch (UnreadableException e1) {
+						e1.printStackTrace();
+					}
+					
+					if (myObject instanceof Msg.RoomBargin) {
+						Msg.RoomBargin bargin  = (Msg.RoomBargin) myObject; 
+						System.err.println("Robot ANSWER: " + bargin.isAccept() + " FROM " + bargin.robotStatus.name);
+					}	
+				}
+				break;
+
+			default:
+				break;
+			}
+			block(1000);
+		}
+
+		@Override
+		public boolean done() {
+			return doBargain;
+		}
+		
+	}
 	class dustManagingBehaviour extends TickerBehaviour {
 		Agent agent;
 		public dustManagingBehaviour(Agent a, long l){
@@ -48,40 +140,37 @@ public class Room extends Agent{
 		}
 		
 		public void onTick() {
-			//TODO Outcommented for GUI test purposes!
-	//		if (dustlevel > threshold){
-				System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " wants cleaning!");
-				
-	//		}else if (dustlevel <= 0){
-				DFAgentDescription dfd = new DFAgentDescription();
-	            ServiceDescription sd  = new ServiceDescription();
-	            sd.setType( "Robot" );
-	            dfd.addServices(sd);
-	            
-	            DFAgentDescription[] result = null;
-				try {
-					result = DFService.search(agent, dfd);
-				} catch (FIPAException e) {
-					e.printStackTrace();
-				}
-	            
-	            //System.out.println(result.length + " results" );
-				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " wants cleaning!");
 			
-				
-	            for (int i = 0; i < result.length ; i++){
-	            	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
-	            	msg.addReceiver( result[i].getName() );
-	            }
-	            msg.addReceiver(new AID("gui", AID.ISLOCALNAME)); // Add GUI too
-	            
-	            try {
-					msg.setContentObject(new Msg.RoomStatus(name, dustLevel));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-	            send( msg );
-	//		}
+			DFAgentDescription dfd = new DFAgentDescription();
+            ServiceDescription sd  = new ServiceDescription();
+            sd.setType( "Robot" );
+            dfd.addServices(sd);
+            
+            DFAgentDescription[] result = null;
+			try {
+				result = DFService.search(agent, dfd);
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+            
+            //System.out.println(result.length + " results" );
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+		
+			
+            for (int i = 0; i < result.length ; i++){
+            	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
+            	msg.addReceiver( result[i].getName() );
+            }
+            msg.addReceiver(new AID("gui", AID.ISLOCALNAME)); // Add GUI too
+            
+            try {
+            	roomStatus = new Msg.RoomStatus(name, dustLevel);
+				msg.setContentObject(roomStatus);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            send( msg );
 		}
 			
 	}
@@ -116,6 +205,10 @@ public class Room extends Agent{
 				if (dustLevel < 0){
 					dustLevel = 0;
 				}
+			}
+			
+			if(dustLevel > dustThreshold){
+				doBargain = true;
 			}
 			System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " - " + dustLevel);
 			block(1000);
