@@ -70,7 +70,7 @@ public class Room extends Agent{
 			
 				
 	            for (int i = 0; i < result.length ; i++){
-	            	System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
+	            	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
 	            	msg.addReceiver( result[i].getName() );
 	            }
 	            msg.addReceiver(new AID("gui", AID.ISLOCALNAME)); // Add GUI too
@@ -110,7 +110,7 @@ public class Room extends Agent{
 				
 				if (myObject instanceof Msg.RobotStatus) {
 					Msg.RobotStatus status =(Msg.RobotStatus) myObject; 
-					System.out.println(status.name + " is removing " + status.deltaDust + " in room " + name);
+					System.out.println(new Date(System.currentTimeMillis()) + ": " + status.name + " is removing " + status.deltaDust + " in room " + name);
 					dustLevel += status.deltaDust;
 				}
 				if (dustLevel < 0){

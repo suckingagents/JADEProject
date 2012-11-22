@@ -37,7 +37,7 @@ public class Robot extends Agent{
         String s;
         if (args != null) {
             room = (String) args[0];
-            System.out.println(name + " in room " + room);
+            System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " in room " + room);
         }
         
         // register to DF
@@ -97,6 +97,7 @@ public class Robot extends Agent{
 		protected void onTick() {
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver( new AID( room , AID.ISLOCALNAME));
+			msg.addReceiver(new AID( "gui", AID.ISLOCALNAME ));
 			int dDust = dustRemoveRatio;
 			Msg.RobotStatus myStatus = new Msg.RobotStatus(name, room, dDust);
 			try {
