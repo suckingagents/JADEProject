@@ -1,16 +1,52 @@
 package MAS;
 
+import java.util.ArrayList;
+
 import jade.core.behaviours.CyclicBehaviour;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
 
 public class GUI extends GuiAgent {
 	transient protected Frame gui; 
 	protected void setup(){
 		gui = new Frame();
 		addBehaviour( new ListenBehaviour(this));
+		AgentContainer c = getContainerController();
+		// Add rooms
+		ArrayList<String> rooms = new ArrayList<String>();
+		for(int i = 0; i < 80; i++){
+			rooms.add("roomN"+i);
+		}
+		try {
+			for (int i = 0; i < rooms.size(); i++) {
+				AgentController a = c.createNewAgent( rooms.get(i), "MAS.Room", null );
+			    a.start();
+			}
+		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		
+		// add robots
+		Object [] args = new Object[1];
+        args[0] = "room1";
+		ArrayList<String> robots = new ArrayList<String>();
+		for(int i = 0; i < 10; i++){
+			robots.add("robotN"+i);
+		}
+		try {
+			for (int i = 0; i < robots.size(); i++) {
+				AgentController a = c.createNewAgent( robots.get(i), "MAS.Robot", args);
+			    a.start();
+			}
+		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	class ListenBehaviour extends CyclicBehaviour {

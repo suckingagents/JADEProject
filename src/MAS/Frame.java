@@ -2,6 +2,7 @@ package MAS;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.HashMap;
@@ -102,7 +103,7 @@ public class Frame extends JFrame {
 			// Set name
 			this.robotVectorList = new Vector<String>();
 			this.robotList = new JList(robotVectorList);
-			robotList.setFixedCellWidth(200);
+			robotList.setFixedCellWidth(50);
 			robotVectorList.add("Hejse");
 			this.name = name;
 			this.nameLbl = new JLabel(name);
@@ -112,6 +113,7 @@ public class Frame extends JFrame {
 			this.add(robotAmountLbl);
 			this.add(robotList);
 			this.add(dustLbl);
+			this.setMinimumSize(new Dimension(200, 50));
 			
 			// Set level
 			this.setDustlevel(dustlevel);

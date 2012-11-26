@@ -36,7 +36,7 @@ public class Robot extends Agent{
 	protected void setup(){
 		room = null;
 		name = getAID().getLocalName();
-		dustRemoveRatio = -3;
+		dustRemoveRatio = -6;
 		
 		Object[] args = getArguments();
         String s;
@@ -70,7 +70,7 @@ public class Robot extends Agent{
 		static final int ST_WAIT_FOR_ACCEPT = 1;
 		int state;
 		long q0;
-		int MAX_WAIT_TIME = 10000;
+		int MAX_WAIT_TIME = 2000;
 		public ListenBehaviour(Agent a){
 			state = ST_IDLE;
 			this.agent = a;

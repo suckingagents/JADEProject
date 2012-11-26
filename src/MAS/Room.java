@@ -30,8 +30,8 @@ public class Room extends Agent{
 	Msg.RoomStatus roomStatus;
 	boolean doBargain = false;
 	protected void setup(){
-//		dustlevel = new Random().nextInt(100);
-		dustLevel = 40;
+		dustLevel = new Random().nextInt(50);
+		//dustLevel = ;
 		dustThreshold = 50;
 		maxDustLevel = 255;
 		dustRatio = 1;
@@ -68,7 +68,7 @@ public class Room extends Agent{
 		static final int ST_WAIT_INCOMING = 1;
 		static final int ST_WAIT_TIMEOUT = 2;
 		long q0;
-		static final long MAX_WAIT_TIME = 10000;
+		static final long MAX_WAIT_TIME = 2000;
 		
 		public BargainBehavior(Room room){
 			this.room = room;
@@ -141,7 +141,7 @@ public class Room extends Agent{
 			case ST_WAIT_TIMEOUT:
 				q1 = System.currentTimeMillis();
 				q1 = q1 - q0;
-				if ( q1 >= MAX_WAIT_TIME ){
+				if ( q1 >= 10000 ){ // Wait 10 seconds before requesting again
 					// go back to idle
 					state = ST_IDLE;
 				}
@@ -162,7 +162,9 @@ public class Room extends Agent{
 		
 		public void onTick() {
 			//System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " wants cleaning!");
-			
+			if(dustLevel + dustRatio <= maxDustLevel) {
+				dustLevel += dustRatio;
+			}
 			DFAgentDescription dfd = new DFAgentDescription();
             ServiceDescription sd  = new ServiceDescription();
             sd.setType( "Robot" );
@@ -205,9 +207,6 @@ public class Room extends Agent{
 		@Override
 		public void action() {
 			// We can only fill the room with maxDustLevel.
-			if(dustLevel + dustRatio <= maxDustLevel) {
-				dustLevel += dustRatio;
-			}
 			
 			ACLMessage msg = receive();
 			if (msg != null){
