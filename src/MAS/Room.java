@@ -31,10 +31,10 @@ public class Room extends Agent{
 	boolean doBargain = false;
 	protected void setup(){
 //		dustlevel = new Random().nextInt(100);
-		dustLevel = 30;
+		dustLevel = 40;
 		dustThreshold = 50;
 		maxDustLevel = 255;
-		dustRatio = 5;
+		dustRatio = 1;
 		name = getAID().getLocalName();
 		
 		addBehaviour(new dustBehaviour( this ));
@@ -61,13 +61,14 @@ public class Room extends Agent{
         }
 	}
 	
-	class BargainBehavior extends SimpleBehaviour{
+	class BargainBehavior extends CyclicBehaviour{
 		Room room;
 		int state;
 		static final int ST_IDLE = 0;
 		static final int ST_WAIT_INCOMING = 1;
+		static final int ST_WAIT_TIMEOUT = 2;
 		long q0;
-		static final long MAX_WAIT_TIME = 5000;
+		static final long MAX_WAIT_TIME = 10000;
 		
 		public BargainBehavior(Room room){
 			this.room = room;
@@ -78,7 +79,6 @@ public class Room extends Agent{
 			switch (state) {
 			case ST_IDLE:
 					if (doBargain){
-						System.err.println("WE START HERE");
 						// request for robot
 						Msg.RoomBargin bargain = new Msg.RoomBargin(Msg.RoomBargin.AGENT_ROOM, Msg.RoomBargin.TYPE_REQUEST, roomStatus);
 						ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -86,7 +86,7 @@ public class Room extends Agent{
 						try {
 							msg.setContentObject(bargain);
 							send(msg);
-							System.err.println("MSG SENT");
+							System.err.println(name + "\tROOM STATE IDLE:\t" + name + ": Request for robot: SENT");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -96,11 +96,13 @@ public class Room extends Agent{
 					}
 				break;
 			case ST_WAIT_INCOMING:
+				System.out.println(name + "\tROOM STATE WAIT:\t Waiting...");
 				long q1 = System.currentTimeMillis();
 				q1 = q1 - q0;
 				if ( q1 >= MAX_WAIT_TIME ){
 					// go back to idle
 					state = ST_IDLE;
+					System.err.println(name + " received NO response from robots");
 				}
 				
 				// Check for answer
@@ -115,8 +117,33 @@ public class Room extends Agent{
 					
 					if (myObject instanceof Msg.RoomBargin) {
 						Msg.RoomBargin bargin  = (Msg.RoomBargin) myObject; 
-						System.err.println("Robot ANSWER: " + bargin.isAccept() + " FROM " + bargin.robotStatus.name);
+						System.err.println(name + "\tROOM STATE WAIT:\t" + name + ": Robot ANSWER: " + bargin.isAccept() + " FROM " + bargin.robotStatus.name);
+						if (bargin.isAccept()){
+							System.out.println(name + "\tROOM STATE WAIT:\tACCEPTING ROBOT: " + bargin.robotStatus.name);
+							msg = new ACLMessage(ACLMessage.INFORM);
+							msg.addReceiver(new AID(bargin.robotStatus.name, AID.ISLOCALNAME));
+							bargin.accept = true;
+							bargin.type = Msg.RoomBargin.TYPE_ANSWER;
+							try {
+								msg.setContentObject(bargin);
+								send(msg);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							doBargain = false;
+							q0 = System.currentTimeMillis();
+							state = ST_WAIT_TIMEOUT;
+						}
 					}	
+				}
+				break;
+			case ST_WAIT_TIMEOUT:
+				q1 = System.currentTimeMillis();
+				q1 = q1 - q0;
+				if ( q1 >= MAX_WAIT_TIME ){
+					// go back to idle
+					state = ST_IDLE;
 				}
 				break;
 
@@ -125,12 +152,6 @@ public class Room extends Agent{
 			}
 			block(1000);
 		}
-
-		@Override
-		public boolean done() {
-			return doBargain;
-		}
-		
 	}
 	class dustManagingBehaviour extends TickerBehaviour {
 		Agent agent;
@@ -140,7 +161,7 @@ public class Room extends Agent{
 		}
 		
 		public void onTick() {
-			System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " wants cleaning!");
+			//System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " wants cleaning!");
 			
 			DFAgentDescription dfd = new DFAgentDescription();
             ServiceDescription sd  = new ServiceDescription();
@@ -209,8 +230,10 @@ public class Room extends Agent{
 			
 			if(dustLevel > dustThreshold){
 				doBargain = true;
+			}else{
+				doBargain = false;
 			}
-			System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " - " + dustLevel);
+			//System.out.println(new Date(System.currentTimeMillis()) + ": " + name + " - " + dustLevel);
 			block(1000);
 		}
 		

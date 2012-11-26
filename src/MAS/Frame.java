@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.swing.Box;
@@ -46,6 +47,14 @@ public class Frame extends JFrame {
 	public void updateRobotMap(){
 		String robotStr, roomStr;
 		GuiRoom room;
+
+		for (Entry<String, GuiRoom> entry : roomMap.entrySet()){
+			roomStr = entry.getKey();
+			room = entry.getValue();
+			room.robotVectorList.clear();
+			room.robotAmountLbl.setText("0");
+		}
+		
 		for (Map.Entry<String, String> entry : robotInRoomMap.entrySet())
 		{
 			//System.out.println("ROBOTMAP: " + entry.getKey() + "/" + entry.getValue());
@@ -54,6 +63,9 @@ public class Frame extends JFrame {
 			room = roomMap.get(roomStr);
 			if(room != null){
 				room.addRobot(robotStr);
+				int amount = Integer.parseInt(room.robotAmountLbl.getText());
+				amount++;
+				room.robotAmountLbl.setText(""+amount);
 			}	
 		    
 		}
@@ -82,6 +94,7 @@ public class Frame extends JFrame {
 		private String name;
 		private JLabel nameLbl;
 		private JLabel dustLbl;
+		public JLabel robotAmountLbl;
 		private int dustlevel;
 		Vector<String> robotVectorList;
 		JList robotList;
@@ -89,11 +102,14 @@ public class Frame extends JFrame {
 			// Set name
 			this.robotVectorList = new Vector<String>();
 			this.robotList = new JList(robotVectorList);
+			robotList.setFixedCellWidth(200);
 			robotVectorList.add("Hejse");
 			this.name = name;
 			this.nameLbl = new JLabel(name);
 			this.dustLbl = new JLabel();
+			robotAmountLbl = new JLabel("0");
 			this.add(nameLbl);
+			this.add(robotAmountLbl);
 			this.add(robotList);
 			this.add(dustLbl);
 			
@@ -117,7 +133,7 @@ public class Frame extends JFrame {
 		public void addRobot(String robot){
 			if (!robotVectorList.contains(robot)){
 				robotVectorList.add(robot);
-				robotList.updateUI();
+				//robotList.updateUI();
 			}
 		}
 		
@@ -137,6 +153,17 @@ public class Frame extends JFrame {
 				red = 255;
 			}
 			
+			if (red >= 255 ){
+				red = 255;
+			}else if (red <= 0){
+				red = 0;
+			}
+			
+			if (green >= 255 ){
+				green = 255;
+			}else if (green <= 0){
+				green = 0;
+			}
 			this.setBackground(new Color(red, green,0));
 		}
 		
