@@ -9,22 +9,31 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
 
 public class GUI extends GuiAgent {
+	/*
+	 * -gui room1:MAS.Room;room2:MAS.Room;room3:MAS.Room;room4:MAS.Room;room5:MAS.Room;room6:MAS.Room;room7:MAS.Room;robot1:MAS.Robot("room1");robot2:MAS.Robot("room1");robot3:MAS.Robot("room2");gui:MAS.GUI;
+	 */
 	transient protected Frame gui; 
 	protected void setup(){
 		gui = new Frame();
 		addBehaviour( new ListenBehaviour(this));
 		AgentContainer c = getContainerController();
+		try {
+			c.createNewAgent( "stats", "MAS.Statistics", null).start();;
+		} catch (StaleProxyException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// Add rooms
 		ArrayList<String> rooms = new ArrayList<String>();
 		for(int i = 0; i < 80; i++){
-			rooms.add("roomN"+i);
+			rooms.add("room"+i);
 		}
 		try {
 			for (int i = 0; i < rooms.size(); i++) {
-				AgentController a = c.createNewAgent( rooms.get(i), "MAS.Room", null );
-			    a.start();
+				c.createNewAgent( rooms.get(i), "MAS.Room", null ).start();
 			}
 		}
 		catch (Exception e){
@@ -40,8 +49,7 @@ public class GUI extends GuiAgent {
 		}
 		try {
 			for (int i = 0; i < robots.size(); i++) {
-				AgentController a = c.createNewAgent( robots.get(i), "MAS.Robot", args);
-			    a.start();
+				c.createNewAgent( robots.get(i), "MAS.Robot", args).start();;
 			}
 		}
 		catch (Exception e){

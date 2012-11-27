@@ -38,7 +38,7 @@ public class Room extends Agent{
 		name = getAID().getLocalName();
 		
 		addBehaviour(new dustBehaviour( this ));
-		addBehaviour(new dustManagingBehaviour( this, 1000 ));
+		addBehaviour(new dustManagingBehaviour( this, Msg.TIME_LAPSE ));
 		addBehaviour( new BargainBehavior(this));
 	}
 	
@@ -68,7 +68,7 @@ public class Room extends Agent{
 		static final int ST_WAIT_INCOMING = 1;
 		static final int ST_WAIT_TIMEOUT = 2;
 		long q0;
-		static final long MAX_WAIT_TIME = 2000;
+		static final long MAX_WAIT_TIME = Msg.TIME_LAPSE * 2;
 		
 		public BargainBehavior(Room room){
 			this.room = room;
@@ -86,7 +86,7 @@ public class Room extends Agent{
 						try {
 							msg.setContentObject(bargain);
 							send(msg);
-							System.err.println(name + "\tROOM STATE IDLE:\t" + name + ": Request for robot: SENT");
+							//System.err.println(name + "\tROOM STATE IDLE:\t" + name + ": Request for robot: SENT");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -96,13 +96,13 @@ public class Room extends Agent{
 					}
 				break;
 			case ST_WAIT_INCOMING:
-				System.out.println(name + "\tROOM STATE WAIT:\t Waiting...");
+				//System.out.println(name + "\tROOM STATE WAIT:\t Waiting...");
 				long q1 = System.currentTimeMillis();
 				q1 = q1 - q0;
 				if ( q1 >= MAX_WAIT_TIME ){
 					// go back to idle
 					state = ST_IDLE;
-					System.err.println(name + " received NO response from robots");
+					//System.err.println(name + " received NO response from robots");
 				}
 				
 				// Check for answer
@@ -117,9 +117,9 @@ public class Room extends Agent{
 					
 					if (myObject instanceof Msg.RoomBargin) {
 						Msg.RoomBargin bargin  = (Msg.RoomBargin) myObject; 
-						System.err.println(name + "\tROOM STATE WAIT:\t" + name + ": Robot ANSWER: " + bargin.isAccept() + " FROM " + bargin.robotStatus.name);
+						//System.err.println(name + "\tROOM STATE WAIT:\t" + name + ": Robot ANSWER: " + bargin.isAccept() + " FROM " + bargin.robotStatus.name);
 						if (bargin.isAccept()){
-							System.out.println(name + "\tROOM STATE WAIT:\tACCEPTING ROBOT: " + bargin.robotStatus.name);
+							//System.out.println(name + "\tROOM STATE WAIT:\tACCEPTING ROBOT: " + bargin.robotStatus.name);
 							msg = new ACLMessage(ACLMessage.INFORM);
 							msg.addReceiver(new AID(bargin.robotStatus.name, AID.ISLOCALNAME));
 							bargin.accept = true;
@@ -141,7 +141,7 @@ public class Room extends Agent{
 			case ST_WAIT_TIMEOUT:
 				q1 = System.currentTimeMillis();
 				q1 = q1 - q0;
-				if ( q1 >= 10000 ){ // Wait 10 seconds before requesting again
+				if ( q1 >= Msg.TIME_LAPSE * 10 ){ // Wait 10 seconds before requesting again
 					// go back to idle
 					state = ST_IDLE;
 				}
@@ -186,6 +186,7 @@ public class Room extends Agent{
             	msg.addReceiver( result[i].getName() );
             }
             msg.addReceiver(new AID("gui", AID.ISLOCALNAME)); // Add GUI too
+            msg.addReceiver(new AID("stats", AID.ISLOCALNAME)); // Add Stats too
             
             try {
             	roomStatus = new Msg.RoomStatus(name, dustLevel);
@@ -219,7 +220,7 @@ public class Room extends Agent{
 				
 				if (myObject instanceof Msg.RobotStatus) {
 					Msg.RobotStatus status =(Msg.RobotStatus) myObject; 
-					System.out.println(new Date(System.currentTimeMillis()) + ": " + status.name + " is removing " + status.deltaDust + " in room " + name);
+					//System.out.println(new Date(System.currentTimeMillis()) + ": " + status.name + " is removing " + status.deltaDust + " in room " + name);
 					dustLevel += status.deltaDust;
 				}
 				if (dustLevel < 0){

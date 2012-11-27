@@ -3,6 +3,7 @@ package MAS;
 import java.io.Serializable;
 
 public class Msg implements Serializable{
+	static final int TIME_LAPSE = 100;
 	static class RobotStatus implements Serializable{
 		int deltaDust;
 		String name;

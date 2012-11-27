@@ -60,7 +60,7 @@ public class Robot extends Agent{
         	fe.printStackTrace(); 
         }
         
-        addBehaviour( new cleainingBehaviour( this, 1000));
+        addBehaviour( new cleainingBehaviour( this, Msg.TIME_LAPSE));
         addBehaviour(new ListenBehaviour( this ));    
 	}
 	
@@ -70,7 +70,7 @@ public class Robot extends Agent{
 		static final int ST_WAIT_FOR_ACCEPT = 1;
 		int state;
 		long q0;
-		int MAX_WAIT_TIME = 2000;
+		int MAX_WAIT_TIME = Msg.TIME_LAPSE * 2;
 		public ListenBehaviour(Agent a){
 			state = ST_IDLE;
 			this.agent = a;
@@ -98,7 +98,7 @@ public class Robot extends Agent{
 				
 				if (myObject instanceof Msg.RoomBargin){
 					Msg.RoomBargin bargain = (Msg.RoomBargin) myObject;
-					System.out.println(name + " received bargin: " + bargain.type);
+					//System.out.println(name + " received bargin: " + bargain.type);
 					switch (state) {
 					case ST_IDLE:
 							//if(bargain.type == Msg.RoomBargin.TYPE_REQUEST && !roomStatus.name.equals(bargain.roomStatus.name)) {
@@ -109,8 +109,8 @@ public class Robot extends Agent{
 								msg = new ACLMessage(ACLMessage.INFORM);
 								msg.addReceiver(new AID(bargain.getRoomStatus().name, AID.ISLOCALNAME));
 								// Calc
-								System.out.println(name + "\tROBOT STATE IDLE:\t"+ bargain.getRoomStatus().name + " Requests robot");
-								System.out.println(name + "\tROBOT STATE IDLE:\tMy dust demand: " + (roomStatus.dustLevel + roomChangeCost) + " VS. " + bargain.getRoomStatus().dustLevel);
+								//System.out.println(name + "\tROBOT STATE IDLE:\t"+ bargain.getRoomStatus().name + " Requests robot");
+								//System.out.println(name + "\tROBOT STATE IDLE:\tMy dust demand: " + (roomStatus.dustLevel + roomChangeCost) + " VS. " + bargain.getRoomStatus().dustLevel);
 								if ((roomStatus.dustLevel + roomChangeCost) < bargain.getRoomStatus().dustLevel){
 									// send yes
 									bargain.accept = true;
@@ -135,26 +135,26 @@ public class Robot extends Agent{
 									}
 									state = ST_IDLE;
 								}
-								System.out.println(name + "\t ROBOT STATE IDLE: sent msg: " +bargain.accept + " to " + bargain.getRoomStatus().name );
+								//System.out.println(name + "\t ROBOT STATE IDLE: sent msg: " +bargain.accept + " to " + bargain.getRoomStatus().name );
 							}
 						break;
 					case ST_WAIT_FOR_ACCEPT:
-						System.out.println(name + "\tROBOT STATE WAIT:\t Received msg: " + bargain.type);
+						//System.out.println(name + "\tROBOT STATE WAIT:\t Received msg: " + bargain.type);
 						// timer > rooms timeout
 						long q1 = System.currentTimeMillis();
 						q1 = q1 - q0;
 						if ( q1 >= MAX_WAIT_TIME ){
 							// go back to idle
 							state = ST_IDLE;
-							System.err.println(name + " didn't receive accept from room");
+							//System.err.println(name + " didn't receive accept from room");
 						}
 						if(bargain.type == Msg.RoomBargin.TYPE_ANSWER) {
-							System.out.println(name + "\tROBOT STATE WAIT:\t received answer from room");
+							//System.out.println(name + "\tROBOT STATE WAIT:\t received answer from room");
 							if (bargain.isAccept()){
-								System.out.println("ROBOT STATE WAIT:\t asnwer was yes");
+								//System.out.println("ROBOT STATE WAIT:\t asnwer was yes");
 								// change room
 								room = bargain.roomStatus.name;
-								System.err.println(name + " changes room to " + room);
+								//System.err.println(name + " changes room to " + room);
 								state = ST_IDLE;
 							}
 						}
@@ -183,6 +183,7 @@ public class Robot extends Agent{
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver( new AID( room , AID.ISLOCALNAME));
 			msg.addReceiver(new AID( "gui", AID.ISLOCALNAME ));
+			msg.addReceiver(new AID( "stats", AID.ISLOCALNAME ));
 			int dDust = dustRemoveRatio;
 			robotStatus = new Msg.RobotStatus(name, room, dDust);
 			try {

@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 public class Frame extends JFrame {
 	public JLabel statusLbl;
@@ -52,7 +53,7 @@ public class Frame extends JFrame {
 		for (Entry<String, GuiRoom> entry : roomMap.entrySet()){
 			roomStr = entry.getKey();
 			room = entry.getValue();
-			room.robotVectorList.clear();
+			//room.robotVectorList.clear();
 			room.robotAmountLbl.setText("0");
 		}
 		
@@ -97,22 +98,24 @@ public class Frame extends JFrame {
 		private JLabel dustLbl;
 		public JLabel robotAmountLbl;
 		private int dustlevel;
-		Vector<String> robotVectorList;
-		JList robotList;
+		//Vector<String> robotVectorList;
+		//JList robotList;
 		public GuiRoom(String name, int dustlevel){
 			// Set name
-			this.robotVectorList = new Vector<String>();
-			this.robotList = new JList(robotVectorList);
-			robotList.setFixedCellWidth(50);
-			robotVectorList.add("Hejse");
+			//this.robotVectorList = new Vector<String>();
+			//this.robotList = new JList(robotVectorList);
+			//robotList.setFixedCellWidth(50);
+			//robotVectorList.add("Hejse");
+			this.setLayout(new BorderLayout());
+			this.setBorder(new EmptyBorder(10, 10, 10, 10) );
 			this.name = name;
 			this.nameLbl = new JLabel(name);
 			this.dustLbl = new JLabel();
 			robotAmountLbl = new JLabel("0");
-			this.add(nameLbl);
-			this.add(robotAmountLbl);
-			this.add(robotList);
-			this.add(dustLbl);
+			this.add(nameLbl, BorderLayout.NORTH);
+			this.add(robotAmountLbl, BorderLayout.CENTER);
+			//this.add(robotList);
+			this.add(dustLbl, BorderLayout.SOUTH);
 			this.setMinimumSize(new Dimension(200, 50));
 			
 			// Set level
@@ -133,10 +136,12 @@ public class Frame extends JFrame {
 		}
 		
 		public void addRobot(String robot){
+			/*
 			if (!robotVectorList.contains(robot)){
 				robotVectorList.add(robot);
 				//robotList.updateUI();
 			}
+			*/
 		}
 		
 		public void updateRobotList(){
@@ -167,6 +172,13 @@ public class Frame extends JFrame {
 				green = 0;
 			}
 			this.setBackground(new Color(red, green,0));
+			Color c = this.getBackground();
+			c = new Color(255-c.getRed(),255-c.getGreen(),255-c.getBlue());
+			nameLbl.setForeground(c);
+			dustLbl.setForeground(c);
+			robotAmountLbl.setForeground(c);
+			
+			//nameLbl.setForeground(255,255,255);
 		}
 		
 	}
