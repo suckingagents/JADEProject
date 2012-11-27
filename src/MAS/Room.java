@@ -32,9 +32,9 @@ public class Room extends Agent{
 	protected void setup(){
 		dustLevel = new Random().nextInt(50);
 		//dustLevel = ;
-		dustThreshold = 50;
+		dustThreshold = Msg.roomThreshold;
 		maxDustLevel = 255;
-		dustRatio = 1;
+		dustRatio = Msg.roomDustRatio;
 		name = getAID().getLocalName();
 		
 		addBehaviour(new dustBehaviour( this ));

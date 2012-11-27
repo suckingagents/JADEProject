@@ -28,7 +28,7 @@ public class GUI extends GuiAgent {
 		}
 		// Add rooms
 		ArrayList<String> rooms = new ArrayList<String>();
-		for(int i = 0; i < 80; i++){
+		for(int i = 0; i < Msg.roomAmount; i++){
 			rooms.add("room"+i);
 		}
 		try {
@@ -44,7 +44,7 @@ public class GUI extends GuiAgent {
 		Object [] args = new Object[1];
         args[0] = "room1";
 		ArrayList<String> robots = new ArrayList<String>();
-		for(int i = 0; i < 10; i++){
+		for(int i = 0; i < Msg.robotAmount; i++){
 			robots.add("robotN"+i);
 		}
 		try {

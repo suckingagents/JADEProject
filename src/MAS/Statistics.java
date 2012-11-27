@@ -79,18 +79,20 @@ public class Statistics extends Agent {
 
 
 			System.out.println(new Date(System.currentTimeMillis()) + ": STATISTICS:\t Avg: " + roomAvg + "\tTotal: " + roomSum + " / " + total + "\t Rooms: " + roomN + "\t Robots: " + robotN + "\tInactive: " + inactiveRobots);
-			try{
-				  // Create file 
-				FileWriter fstream = new FileWriter(filename,true);
-				  BufferedWriter out = new BufferedWriter(fstream);
-				  for (Integer i : printlist){
-					  out.write(i + ",");  
-				  }
-				  out.write("\n");
-				  //Close the output stream
-				  out.close();
-			}catch (Exception e){//Catch exception if any
-				  System.err.println("Error: " + e.getMessage());
+			if (roomN >= Msg.roomAmount && robotN >= Msg.robotAmount){
+				try{
+					  // Create file 
+					FileWriter fstream = new FileWriter(filename,true);
+					  BufferedWriter out = new BufferedWriter(fstream);
+					  for (Integer i : printlist){
+						  out.write(i + ",");  
+					  }
+					  out.write("\n");
+					  //Close the output stream
+					  out.close();
+				}catch (Exception e){//Catch exception if any
+					  System.err.println("Error: " + e.getMessage());
+				}	
 			}
 		}
 		

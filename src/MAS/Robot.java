@@ -23,7 +23,6 @@ public class Robot extends Agent{
 	String room;
 	Msg.RoomStatus roomStatus;
 	Msg.RobotStatus robotStatus;
-	static final int roomChangeCost = 20; 
 	public String getRoom() {
 		return room;
 	}
@@ -36,7 +35,7 @@ public class Robot extends Agent{
 	protected void setup(){
 		room = null;
 		name = getAID().getLocalName();
-		dustRemoveRatio = -6;
+		dustRemoveRatio = Msg.robotDustRatio;
 		
 		Object[] args = getArguments();
         String s;
@@ -111,7 +110,7 @@ public class Robot extends Agent{
 								// Calc
 								//System.out.println(name + "\tROBOT STATE IDLE:\t"+ bargain.getRoomStatus().name + " Requests robot");
 								//System.out.println(name + "\tROBOT STATE IDLE:\tMy dust demand: " + (roomStatus.dustLevel + roomChangeCost) + " VS. " + bargain.getRoomStatus().dustLevel);
-								if ((roomStatus.dustLevel + roomChangeCost) < bargain.getRoomStatus().dustLevel){
+								if ((roomStatus.dustLevel + Msg.roomChangeCost) < bargain.getRoomStatus().dustLevel){
 									// send yes
 									bargain.accept = true;
 									try {

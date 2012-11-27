@@ -3,7 +3,18 @@ package MAS;
 import java.io.Serializable;
 
 public class Msg implements Serializable{
-	static final int TIME_LAPSE = 100;
+	/*
+	 * Parameters
+	 */
+	static final int TIME_LAPSE = 100;	// Tidsenhed, der styrer hastigehden af systemet
+	static final int roomAmount = 80;
+	static final int robotAmount = 10;
+	static final int roomThreshold = 50; // Max dustlevel før robotter må tilkaldes
+	static final int robotThreshold = 30; // Min dustlevel før robotter må forlade et værelse
+	static final int robotDustRatio = -6; // level, som robot støvsuger pr. time lapse
+	static final int roomDustRatio = 1; // level, som room stiger med pr. tidsenhed
+	static final int roomChangeCost = 20; // prisenhed, før robot må skifte værelse
+	
 	static class RobotStatus implements Serializable{
 		int deltaDust;
 		String name;
