@@ -1,5 +1,12 @@
 package MAS;
 
+import jade.core.Agent;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+
 import java.io.Serializable;
 
 public class Msg implements Serializable{
@@ -10,11 +17,38 @@ public class Msg implements Serializable{
 	static final int roomAmount = 80;
 	static final int robotAmount = 10;
 	static final int roomThreshold = 50; // Max dustlevel før robotter må tilkaldes
-	static final int robotThreshold = 30; // Min dustlevel før robotter må forlade et værelse
+	static final int robotThreshold = 50; // Min dustlevel før robotter må forlade et værelse
 	static final int robotDustRatio = -6; // level, som robot støvsuger pr. time lapse
 	static final int roomDustRatio = 1; // level, som room stiger med pr. tidsenhed
 	static final int roomChangeCost = 20; // prisenhed, før robot må skifte værelse
 	
+	public static void addAllAgentsToMsg(Agent a, ACLMessage msg, String agentType){
+		DFAgentDescription dfd = new DFAgentDescription();
+        ServiceDescription sd  = new ServiceDescription();
+        sd.setType( agentType);
+        dfd.addServices(sd);
+        
+        DFAgentDescription[] result = null;
+		try {
+			result = DFService.search(a, dfd);
+		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
+		
+        for (int i = 0; i < result.length ; i++){
+        	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
+        	msg.addReceiver( result[i].getName() );
+        }
+	}
+	
+	
+	
+	static class GlobalStatus implements Serializable {
+		int max, min, avg;
+		public GlobalStatus(){
+			
+		}
+	}
 	static class RobotStatus implements Serializable{
 		int deltaDust;
 		String name;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
+import MAS.Msg.GlobalStatus;
 import MAS.Msg.RoomStatus;
 
 import jade.core.AID;
@@ -23,6 +24,7 @@ public class Robot extends Agent{
 	String room;
 	Msg.RoomStatus roomStatus;
 	Msg.RobotStatus robotStatus;
+	int currentAvg = 0;
 	public String getRoom() {
 		return room;
 	}
@@ -95,6 +97,11 @@ public class Robot extends Agent{
 					//System.out.println(new Date(System.currentTimeMillis()) + ": " + roomStatus.name + " has dustlevel " + roomStatus.dustLevel + " ("+name+")");
 				}	
 				
+				if (myObject instanceof Msg.GlobalStatus) {
+					Msg.GlobalStatus tmpStatus = (Msg.GlobalStatus) myObject; 
+					currentAvg = tmpStatus.avg;
+				}	
+				
 				if (myObject instanceof Msg.RoomBargin){
 					Msg.RoomBargin bargain = (Msg.RoomBargin) myObject;
 					//System.out.println(name + " received bargin: " + bargain.type);
@@ -110,7 +117,9 @@ public class Robot extends Agent{
 								// Calc
 								//System.out.println(name + "\tROBOT STATE IDLE:\t"+ bargain.getRoomStatus().name + " Requests robot");
 								//System.out.println(name + "\tROBOT STATE IDLE:\tMy dust demand: " + (roomStatus.dustLevel + roomChangeCost) + " VS. " + bargain.getRoomStatus().dustLevel);
-								if ((roomStatus.dustLevel + Msg.roomChangeCost) < bargain.getRoomStatus().dustLevel){
+								
+								//if ((roomStatus.dustLevel + Msg.roomChangeCost) < bargain.getRoomStatus().dustLevel && roomStatus.dustLevel < Msg.robotThreshold){
+								if (roomStatus.dustLevel < currentAvg){
 									// send yes
 									bargain.accept = true;
 									try {

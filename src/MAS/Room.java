@@ -26,11 +26,12 @@ public class Room extends Agent{
 	int dustRatio;
 	int dustThreshold;
 	int maxDustLevel;
+	int currentAvg;
 	String name;
 	Msg.RoomStatus roomStatus;
 	boolean doBargain = false;
 	protected void setup(){
-		dustLevel = new Random().nextInt(50);
+		dustLevel = new Random().nextInt(Msg.roomThreshold);
 		//dustLevel = ;
 		dustThreshold = Msg.roomThreshold;
 		maxDustLevel = 255;
@@ -40,25 +41,6 @@ public class Room extends Agent{
 		addBehaviour(new dustBehaviour( this ));
 		addBehaviour(new dustManagingBehaviour( this, Msg.TIME_LAPSE ));
 		addBehaviour( new BargainBehavior(this));
-	}
-	
-	private void addAllRobotsToMsg(ACLMessage msg){
-		DFAgentDescription dfd = new DFAgentDescription();
-        ServiceDescription sd  = new ServiceDescription();
-        sd.setType( "Robot" );
-        dfd.addServices(sd);
-        
-        DFAgentDescription[] result = null;
-		try {
-			result = DFService.search(this, dfd);
-		} catch (FIPAException e) {
-			e.printStackTrace();
-		}
-		
-        for (int i = 0; i < result.length ; i++){
-        	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
-        	msg.addReceiver( result[i].getName() );
-        }
 	}
 	
 	class BargainBehavior extends CyclicBehaviour{
@@ -82,7 +64,7 @@ public class Room extends Agent{
 						// request for robot
 						Msg.RoomBargin bargain = new Msg.RoomBargin(Msg.RoomBargin.AGENT_ROOM, Msg.RoomBargin.TYPE_REQUEST, roomStatus);
 						ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-						addAllRobotsToMsg(msg);
+						Msg.addAllAgentsToMsg(room, msg, "Robot");
 						try {
 							msg.setContentObject(bargain);
 							send(msg);
@@ -217,7 +199,10 @@ public class Room extends Agent{
 				} catch (UnreadableException e1) {
 					e1.printStackTrace();
 				}
-				
+				if (myObject instanceof Msg.GlobalStatus) {
+					Msg.GlobalStatus tmpStatus = (Msg.GlobalStatus) myObject; 
+					currentAvg = tmpStatus.avg;
+				}
 				if (myObject instanceof Msg.RobotStatus) {
 					Msg.RobotStatus status =(Msg.RobotStatus) myObject; 
 					//System.out.println(new Date(System.currentTimeMillis()) + ": " + status.name + " is removing " + status.deltaDust + " in room " + name);
@@ -228,7 +213,7 @@ public class Room extends Agent{
 				}
 			}
 			
-			if(dustLevel > dustThreshold){
+			if(dustLevel > dustThreshold && dustLevel > currentAvg){
 				doBargain = true;
 			}else{
 				doBargain = false;

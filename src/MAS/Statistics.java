@@ -39,9 +39,10 @@ public class Statistics extends Agent {
 	}
 	
 	class StatisticsBehviour extends TickerBehaviour{
-
+		Agent agent;
 		public StatisticsBehviour(Agent a, long period) {
 			super(a, period);
+			agent = a;
 		}
 
 		@Override
@@ -55,7 +56,6 @@ public class Statistics extends Agent {
 			
 			printlist.add((int) (System.currentTimeMillis() - t0));
 			printlist.add(robotN);
-			printlist.add(inactiveRobots);
 			
 			// Calculate room statistics
 			for (Entry<String, Integer> entry : map.entrySet()){
@@ -77,9 +77,25 @@ public class Statistics extends Agent {
 				roomAvg = roomSum / roomN;
 			}
 
-
+			printlist.add(inactiveRobots);
+			// All values are up to date
+			// Send a message
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			Msg.addAllAgentsToMsg(agent, msg, "Robot");
+			Msg.addAllAgentsToMsg(agent, msg, "Room");
+			Msg.GlobalStatus status = new Msg.GlobalStatus();
+			status.avg = roomAvg;
+			try {
+				msg.setContentObject(status);
+				send(msg);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			// Print 
 			System.out.println(new Date(System.currentTimeMillis()) + ": STATISTICS:\t Avg: " + roomAvg + "\tTotal: " + roomSum + " / " + total + "\t Rooms: " + roomN + "\t Robots: " + robotN + "\tInactive: " + inactiveRobots);
-			if (roomN >= Msg.roomAmount && robotN >= Msg.robotAmount){
+			// save to file
+			if (roomN >= Msg.roomAmount && robotN >= Msg.robotAmount ){
 				try{
 					  // Create file 
 					FileWriter fstream = new FileWriter(filename,true);
