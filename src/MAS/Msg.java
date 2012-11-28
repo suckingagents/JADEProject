@@ -13,12 +13,12 @@ public class Msg implements Serializable{
 	/*
 	 * Parameters
 	 */
-	static final int TIME_LAPSE = 100;	// Tidsenhed, der styrer hastigehden af systemet
-	static final int roomAmount = 80;
+	static final int TIME_LAPSE = 500;	// Tidsenhed, der styrer hastigehden af systemet
+	static final int roomAmount = 50;
 	static final int robotAmount = 10;
 	static final int roomThreshold = 50; // Max dustlevel før robotter må tilkaldes
 	static final int robotThreshold = 50; // Min dustlevel før robotter må forlade et værelse
-	static final int robotDustRatio = -6; // level, som robot støvsuger pr. time lapse
+	static final int robotDustRatio = -10; // level, som robot støvsuger pr. time lapse
 	static final int roomDustRatio = 1; // level, som room stiger med pr. tidsenhed
 	static final int roomChangeCost = 20; // prisenhed, før robot må skifte værelse
 	
@@ -35,6 +35,7 @@ public class Msg implements Serializable{
 			e.printStackTrace();
 		}
 		
+		//System.err.println(agentType + " LENGTH: " + result.length);
         for (int i = 0; i < result.length ; i++){
         	//System.out.println("Woolooboolo: " + result[i].getName().getLocalName() );
         	msg.addReceiver( result[i].getName() );
@@ -44,7 +45,7 @@ public class Msg implements Serializable{
 	
 	
 	static class GlobalStatus implements Serializable {
-		int max, min, avg;
+		int max, min, avg, q0, q1, q2;
 		public GlobalStatus(){
 			
 		}
